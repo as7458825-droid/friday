@@ -1,5 +1,11 @@
-from Crypto.Cipher import AES
-from Crypto.Random import get_random_bytes
+try:
+    from Crypto.Cipher import AES
+    from Crypto.Random import get_random_bytes
+    HAS_CRYPTO = True
+except ImportError:
+    AES = None
+    get_random_bytes = None
+    HAS_CRYPTO = False
 import logging
 
 logger = logging.getLogger(__name__)
@@ -9,6 +15,8 @@ class SecuritySentinel:
     """Advanced Encryption & Security Sentinel for FRIDAY"""
 
     def encrypt_data(self, data, key=None):
+        if not HAS_CRYPTO:
+            return "pycryptodome not installed. Run: pip install pycryptodome"
         try:
             key = key or get_random_bytes(16)
             cipher = AES.new(key, AES.MODE_EAX)

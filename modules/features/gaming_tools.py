@@ -1,6 +1,11 @@
 import threading
 import time
-import pyautogui
+try:
+    import pyautogui
+    HAS_PYAUTOGUI = True
+except ImportError:
+    pyautogui = None
+    HAS_PYAUTOGUI = False
 
 _auto_clicking = False
 _click_thread = None
@@ -11,6 +16,8 @@ def start_clicker(interval: float = 0.1, button: str = "left") -> str:
     global _auto_clicking, _click_thread, _click_count
     if _auto_clicking:
         return "Already clicking."
+    if not HAS_PYAUTOGUI:
+        return "pyautogui not installed. Run: pip install pyautogui"
     _auto_clicking = True
     _click_count = 0
     _click_thread = threading.Thread(
@@ -44,6 +51,8 @@ def fps_overlay() -> str:
 
 def start_grind(interval: float = 60) -> str:
     global _auto_clicking, _click_thread
+    if not HAS_PYAUTOGUI:
+        return "pyautogui not installed. Run: pip install pyautogui"
     _auto_clicking = True
     _click_thread = threading.Thread(target=_grind_loop, args=(interval,), daemon=True)
     _click_thread.start()

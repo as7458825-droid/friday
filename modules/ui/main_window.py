@@ -160,7 +160,7 @@ class AnimeAssistant(tk.Tk):
 
     def _start_logic(self):
         def loop():
-            from mainbackup import handle_command, detect_mood
+            from main1 import handle_command, detect_mood
             from core.voice import VoiceEngine
 
             voice_engine = VoiceEngine(female_voice=True)

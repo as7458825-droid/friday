@@ -4,10 +4,18 @@ import tempfile
 import wave
 from datetime import datetime
 
-import pyaudio
+try:
+    import pyaudio
+    HAS_PYAUDIO = True
+except ImportError:
+    pyaudio = None
+    HAS_PYAUDIO = False
 
 CHUNK = 1024
-FORMAT = pyaudio.paInt16
+try:
+    FORMAT = pyaudio.paInt16
+except NameError:
+    FORMAT = 8
 CHANNELS = 1
 RATE = 16000
 
@@ -20,6 +28,8 @@ def start_transcribing() -> str:
     global _listening, _transcriber_thread, _audio_frames
     if _listening:
         return "Already transcribing."
+    if not HAS_PYAUDIO:
+        return "pyaudio not installed. Run: pip install pyaudio"
     import importlib.util
 
     if importlib.util.find_spec("whisper") is None:
@@ -70,6 +80,8 @@ def stop_transcribing() -> str:
 
 def _record_audio():
     global _audio_frames
+    if not HAS_PYAUDIO:
+        return
     p = pyaudio.PyAudio()
     try:
         stream = p.open(

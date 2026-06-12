@@ -1,4 +1,9 @@
-import boto3
+try:
+    import boto3
+    HAS_BOTO3 = True
+except ImportError:
+    boto3 = None
+    HAS_BOTO3 = False
 import logging
 
 logger = logging.getLogger(__name__)
@@ -9,6 +14,8 @@ class CloudManager:
 
     def list_s3_buckets(self):
         """Lists all S3 buckets in the configured AWS account"""
+        if not HAS_BOTO3:
+            return "boto3 not installed. Run: pip install boto3"
         try:
             # Requires AWS Credentials in environment or ~/.aws/credentials
             s3 = boto3.client("s3")

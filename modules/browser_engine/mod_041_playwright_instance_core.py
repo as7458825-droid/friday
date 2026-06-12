@@ -1,4 +1,9 @@
-from playwright.sync_api import sync_playwright
+try:
+    from playwright.sync_api import sync_playwright
+    HAS_PLAYWRIGHT = True
+except ImportError:
+    sync_playwright = None
+    HAS_PLAYWRIGHT = False
 
 
 class PlaywrightBrowser:
@@ -9,6 +14,8 @@ class PlaywrightBrowser:
         self.headless = headless
 
     def start(self):
+        if not HAS_PLAYWRIGHT:
+            raise ImportError("playwright not installed. Run: pip install playwright && playwright install")
         self._playwright = sync_playwright().start()
         self.browser = self._playwright.chromium.launch(headless=self.headless)
         self.page = self.browser.new_page()
@@ -40,11 +47,13 @@ class PlaywrightBrowser:
             self._playwright.stop()
 
 
-_browser_instance: PlaywrightBrowser | None = None
+_browser_instance: "PlaywrightBrowser | None" = None
 
 
-def get_browser() -> PlaywrightBrowser:
+def get_browser() -> "PlaywrightBrowser":
     global _browser_instance
+    if not HAS_PLAYWRIGHT:
+        raise ImportError("playwright not installed. Run: pip install playwright && playwright install")
     if _browser_instance is None:
         _browser_instance = PlaywrightBrowser()
         _browser_instance.start()

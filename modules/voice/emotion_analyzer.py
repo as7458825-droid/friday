@@ -1,9 +1,16 @@
-import librosa
+try:
+    import librosa
+    HAS_LIBROSA = True
+except ImportError:
+    librosa = None
+    HAS_LIBROSA = False
 import numpy as np
 
 
 def analyze_emotion(audio_path):
     """Analyze audio for emotional tone based on pitch and energy."""
+    if not HAS_LIBROSA:
+        return "librosa not installed. Run: pip install librosa"
     try:
         y, sr = librosa.load(audio_path)
         # Pitch (F0)

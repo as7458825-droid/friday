@@ -1,7 +1,12 @@
 import logging
 import os
 import platform
-import speech_recognition as sr
+try:
+    import speech_recognition as sr
+    HAS_SR = True
+except ImportError:
+    sr = None
+    HAS_SR = False
 import pyttsx3
 import tempfile
 from datetime import datetime
@@ -14,8 +19,8 @@ class VoiceEngine:
     def __init__(self, female_voice: bool = True, language: str = "en-IN"):
         self._init_com()
         self.language = language
-        self.recognizer = sr.Recognizer()
-        self.microphone = sr.Microphone()
+        self.recognizer = sr.Recognizer() if HAS_SR else None
+        self.microphone = sr.Microphone() if HAS_SR else None
 
         # ElevenLabs Setup
         self.el_api_key = os.environ.get("ELEVENLABS_API_KEY")
@@ -122,6 +127,9 @@ class VoiceEngine:
             self.tts_engine.runAndWait()
 
     def listen(self, language: str = None) -> str | None:
+        if not HAS_SR or not self.recognizer or not self.microphone:
+            print("SpeechRecognition not installed. Run: pip install SpeechRecognition")
+            return None
         lang = language or self.language
         with self.microphone as source:
             self.recognizer.adjust_for_ambient_noise(source, duration=0.5)

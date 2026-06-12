@@ -1,13 +1,20 @@
 import os
 import uuid
 
-import chromadb
-from chromadb.config import Settings
+try:
+    import chromadb
+    from chromadb.config import Settings
+    HAS_CHROMADB = True
+except ImportError:
+    chromadb = None
+    HAS_CHROMADB = False
 
 CHROMA_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "memory_db")
 
 
 def get_client() -> chromadb.PersistentClient:
+    if not HAS_CHROMADB:
+        raise ImportError("chromadb not installed. Run: pip install chromadb")
     return chromadb.PersistentClient(
         path=CHROMA_DIR, settings=Settings(anonymized_telemetry=False)
     )
@@ -19,6 +26,8 @@ def get_or_create_collection(name: str = "workspace"):
 
 
 def add_to_memory(text: str, metadata: dict | None = None) -> str:
+    if not HAS_CHROMADB:
+        return "chromadb not installed. Run: pip install chromadb"
     doc_id = str(uuid.uuid4())
     collection = get_or_create_collection()
     collection.add(
@@ -30,6 +39,8 @@ def add_to_memory(text: str, metadata: dict | None = None) -> str:
 
 
 def search_memory(query: str, top_k: int = 3) -> list[dict]:
+    if not HAS_CHROMADB:
+        return []
     collection = get_or_create_collection()
     results = collection.query(query_texts=[query], n_results=top_k)
     if not results["documents"] or not results["documents"][0]:

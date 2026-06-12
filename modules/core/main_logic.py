@@ -225,19 +225,20 @@ def handle_command(command: str | None, voice: VoiceEngine) -> bool:
             )
 
             voice.speak("Launching Browser...", source_lang)
-            res = mod_041_playwright_instance_core()
+            from modules.browser_engine.mod_041_playwright_instance_core import goto as _browser_goto
+            url = command.replace("browser", "").replace("scrape", "").strip() or "example.com"
+            res = _browser_goto(url)
             voice.speak(str(res), source_lang)
             return True
 
     # Data Analytics
     if FEATURES.get("data_analytics"):
         if "dataframe" in cmd_lower or "chart" in cmd_lower:
-            from modules.data_analytics.mod_082_matplotlib_chart_painter import (
-                mod_082_matplotlib_chart_painter,
-            )
-
             voice.speak("Analyzing Data Patterns...", source_lang)
-            res = mod_082_matplotlib_chart_painter()
+            from modules.data_analytics.mod_082_matplotlib_chart_painter import create_chart
+            import pandas as pd
+            dummy_data = pd.DataFrame({"values": [10, 20, 15, 30, 25]})
+            res = create_chart(dummy_data, chart_type="line", title="Quick Chart")
             voice.speak(str(res), source_lang)
             return True
 

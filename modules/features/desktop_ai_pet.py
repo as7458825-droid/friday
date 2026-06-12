@@ -3,7 +3,12 @@ import random
 import threading
 import time
 
-import pyautogui
+try:
+    import pyautogui
+    HAS_PYAUTOGUI = True
+except ImportError:
+    pyautogui = None
+    HAS_PYAUTOGUI = False
 
 try:
     import tkinter as tk
@@ -71,25 +76,26 @@ def _pet_loop():
     while _active:
         try:
             win.update()
-            mx, my = pyautogui.position()
-            dx = mx - (int(win.winfo_x()) + 40)
-            dy = my - (int(win.winfo_y()) + 25)
-            dist = math.sqrt(dx * dx + dy * dy)
-            if dist < 50:
-                _mood = "happy"
-                _x += random.uniform(-1, 1)
-                _y += random.uniform(-1, 1)
-            elif random.random() < 0.01:
-                _mood = random.choice(list(FRAMES.keys()))
-                speech_text = EMOTES[_mood]
-                speech_timer = time.time()
-                mood_timer = time.time()
-            elif time.time() - mood_timer > 15:
-                _mood = random.choice(["idle", "sleep"])
-                mood_timer = time.time()
-            if dist > 100:
-                _x += (dx / dist) * 0.5 if dist > 0 else 0
-                _y += (dy / dist) * 0.5 if dist > 0 else 0
+            if HAS_PYAUTOGUI:
+                mx, my = pyautogui.position()
+                dx = mx - (int(win.winfo_x()) + 40)
+                dy = my - (int(win.winfo_y()) + 25)
+                dist = math.sqrt(dx * dx + dy * dy)
+                if dist < 50:
+                    _mood = "happy"
+                    _x += random.uniform(-1, 1)
+                    _y += random.uniform(-1, 1)
+                elif random.random() < 0.01:
+                    _mood = random.choice(list(FRAMES.keys()))
+                    speech_text = EMOTES[_mood]
+                    speech_timer = time.time()
+                    mood_timer = time.time()
+                elif time.time() - mood_timer > 15:
+                    _mood = random.choice(["idle", "sleep"])
+                    mood_timer = time.time()
+                if dist > 100:
+                    _x += (dx / dist) * 0.5 if dist > 0 else 0
+                    _y += (dy / dist) * 0.5 if dist > 0 else 0
             if win.winfo_x() < 0:
                 _x = 0
             if win.winfo_y() < 0:

@@ -10,7 +10,7 @@ from pydantic import BaseModel
 # Add current directory to path so we can import main
 sys.path.append(os.getcwd())
 
-from mainbackup import handle_command
+from main1 import handle_command
 from config import FEATURES
 
 app = FastAPI(title="FRIDAY AI Bridge")

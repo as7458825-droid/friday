@@ -3,7 +3,12 @@ import os
 import threading
 import time
 
-import pyautogui
+try:
+    import pyautogui
+    HAS_PYAUTOGUI = True
+except ImportError:
+    pyautogui = None
+    HAS_PYAUTOGUI = False
 from pynput import mouse, keyboard
 
 MACROS_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "memory_db", "macros")
@@ -48,6 +53,8 @@ def play_macro(name: str) -> str:
     global _playing
     if _playing:
         return "Already playing a macro."
+    if not HAS_PYAUTOGUI:
+        return "pyautogui not installed. Run: pip install pyautogui"
     _ensure_dir()
     path = os.path.join(MACROS_DIR, f"{name}.json")
     if not os.path.isfile(path):

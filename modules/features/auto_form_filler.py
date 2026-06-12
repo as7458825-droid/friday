@@ -1,7 +1,12 @@
 import json
 import os
 
-import pyautogui
+try:
+    import pyautogui
+    HAS_PYAUTOGUI = True
+except ImportError:
+    pyautogui = None
+    HAS_PYAUTOGUI = False
 
 PROFILES_FILE = os.path.join(
     os.path.dirname(__file__), "..", "..", "memory_db", "form_profiles.json"
@@ -31,6 +36,8 @@ def create_profile(name: str, fields: dict) -> str:
 
 
 def fill_profile(profile_name: str) -> str:
+    if not HAS_PYAUTOGUI:
+        return "pyautogui not installed. Run: pip install pyautogui"
     profiles = _load()
     profile = profiles.get(profile_name)
     if not profile:

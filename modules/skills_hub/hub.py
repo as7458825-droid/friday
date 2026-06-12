@@ -1,5 +1,10 @@
 import os
-import replicate
+try:
+    import replicate
+    HAS_REPLICATE = True
+except ImportError:
+    replicate = None
+    HAS_REPLICATE = False
 import logging
 from github import Github
 import yt_dlp
@@ -16,6 +21,8 @@ class SkillsHub:
 
     # --- 1-3: CREATIVE STUDIO (ai-image-generation, ai-video-generation, image-enhancer) ---
     def generate_image(self, prompt, model="stability-ai/sdxl:36214569"):
+        if not HAS_REPLICATE:
+            return "Error: replicate library not installed. Run: pip install replicate"
         if not self.replicate_token:
             return "Error: REPLICATE_API_TOKEN missing"
         try:
@@ -25,6 +32,8 @@ class SkillsHub:
             return f"Failed: {e}"
 
     def generate_video(self, prompt, model="google/veo-1"):
+        if not HAS_REPLICATE:
+            return "Error: replicate library not installed. Run: pip install replicate"
         if not self.replicate_token:
             return "Error: REPLICATE_API_TOKEN missing"
         try:
@@ -37,6 +46,8 @@ class SkillsHub:
             return f"Video failed: {e}"
 
     def enhance_image(self, image_url):
+        if not HAS_REPLICATE:
+            return "Error: replicate library not installed. Run: pip install replicate"
         if not self.replicate_token:
             return "Error: REPLICATE_API_TOKEN missing"
         try:

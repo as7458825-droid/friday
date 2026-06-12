@@ -1,5 +1,10 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+try:
+    from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options
+    HAS_SELENIUM = True
+except ImportError:
+    webdriver = None
+    HAS_SELENIUM = False
 from bs4 import BeautifulSoup
 import logging
 import time
@@ -12,6 +17,8 @@ class DeepResearch:
 
     def search_and_summarize(self, query):
         """Performs a deep search and returns a structured summary"""
+        if not HAS_SELENIUM:
+            return "selenium not installed. Run: pip install selenium"
         try:
             chrome_options = Options()
             chrome_options.add_argument("--headless")

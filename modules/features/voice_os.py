@@ -3,8 +3,18 @@ import queue
 import threading
 import time
 
-import keyboard
-import pyautogui
+try:
+    import keyboard
+    HAS_KEYBOARD = True
+except ImportError:
+    keyboard = None
+    HAS_KEYBOARD = False
+try:
+    import pyautogui
+    HAS_PYAUTOGUI = True
+except ImportError:
+    pyautogui = None
+    HAS_PYAUTOGUI = False
 import pyperclip
 
 _active = False
@@ -31,13 +41,16 @@ def _load_config() -> str:
     import json
 
     if os.path.isfile(HOTKEY_FILE):
-        with open(HOTKEY_FILE) as f:
-            return json.load(f).get("hotkey", "ctrl+alt+v")
+        return json.load(f).get("hotkey", "ctrl+alt+v")
     return "ctrl+alt+v"
 
 
 def start() -> str:
     global _active, _hotkey
+    if not HAS_KEYBOARD:
+        return "keyboard library not installed. Run: pip install keyboard"
+    if not HAS_PYAUTOGUI:
+        return "pyautogui library not installed. Run: pip install pyautogui"
     _hotkey = _load_config()
     _active = True
     try:
@@ -139,6 +152,8 @@ def _on_hotkey():
 
 
 def _type_text(text: str):
+    if not HAS_PYAUTOGUI:
+        return
     pyperclip.copy(text)
     pyautogui.hotkey("ctrl", "v")
     time.sleep(0.1)

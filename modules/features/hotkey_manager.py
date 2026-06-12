@@ -1,7 +1,12 @@
 import json
 import os
 
-import keyboard
+try:
+    import keyboard
+    HAS_KEYBOARD = True
+except ImportError:
+    keyboard = None
+    HAS_KEYBOARD = False
 
 BINDINGS_FILE = os.path.join(
     os.path.dirname(__file__), "..", "..", "memory_db", "hotkeys.json"
@@ -28,6 +33,8 @@ def bind_hotkey(combo: str, action: str) -> str:
     _load()
     _hotkeys[combo.lower()] = action
     _save()
+    if not HAS_KEYBOARD:
+        return "keyboard library not installed. Run: pip install keyboard"
     try:
         keyboard.add_hotkey(combo, lambda a=action: _execute_action(a))
     except Exception as e:
@@ -40,10 +47,11 @@ def unbind_hotkey(combo: str) -> str:
     if combo.lower() in _hotkeys:
         del _hotkeys[combo.lower()]
         _save()
-        try:
-            keyboard.remove_hotkey(combo)
-        except Exception:
-            pass
+        if HAS_KEYBOARD:
+            try:
+                keyboard.remove_hotkey(combo)
+            except Exception:
+                pass
         return f"Unbound '{combo}'."
     return f"'{combo}' not bound."
 
@@ -65,12 +73,16 @@ def _execute_action(action: str):
     elif action.startswith("app:"):
         os.startfile(action[4:].strip())
     elif action.startswith("key:"):
-        keyboard.press_and_release(action[4:].strip())
+        if HAS_KEYBOARD:
+            keyboard.press_and_release(action[4:].strip())
     elif action.startswith("type:"):
-        keyboard.write(action[5:])
+        if HAS_KEYBOARD:
+            keyboard.write(action[5:])
 
 
 def initialize():
+    if not HAS_KEYBOARD:
+        return
     _load()
     for combo, action in _hotkeys.items():
         try:

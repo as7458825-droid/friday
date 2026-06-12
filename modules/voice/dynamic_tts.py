@@ -1,12 +1,23 @@
 import asyncio
-import edge_tts
+try:
+    import edge_tts
+    HAS_EDGE_TTS = True
+except ImportError:
+    edge_tts = None
+    HAS_EDGE_TTS = False
 import os
-import pygame
+try:
+    import pygame
+    HAS_PYGAME = True
+except ImportError:
+    pygame = None
+    HAS_PYGAME = False
 
 
 async def speak_with_emotion(text, emotion="neutral"):
     """Speak text using Edge-TTS with appropriate voice tone."""
-    # Mapping emotions to specific voices/styles
+    if not HAS_EDGE_TTS:
+        return
     voice_map = {
         "excited": "en-US-AvaNeural",
         "sad/tired": "en-US-EmmaNeural",
@@ -20,7 +31,8 @@ async def speak_with_emotion(text, emotion="neutral"):
     communicate = edge_tts.Communicate(text, voice)
     await communicate.save(output_file)
 
-    # Play the audio
+    if not HAS_PYGAME:
+        return
     pygame.mixer.init()
     pygame.mixer.music.load(output_file)
     pygame.mixer.music.play()

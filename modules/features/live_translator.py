@@ -3,7 +3,12 @@ import tempfile
 import threading
 import wave
 
-import pyaudio
+try:
+    import pyaudio
+    HAS_PYAUDIO = True
+except ImportError:
+    pyaudio = None
+    HAS_PYAUDIO = False
 
 _translating = False
 _thread = None
@@ -11,7 +16,10 @@ _source_lang = "auto"
 _target_lang = "en"
 
 CHUNK = 1024
-FORMAT = pyaudio.paInt16
+try:
+    FORMAT = pyaudio.paInt16
+except NameError:
+    FORMAT = 8
 CHANNELS = 1
 RATE = 16000
 RECORD_SECONDS = 4
@@ -21,6 +29,8 @@ def start(source: str = "auto", target: str = "en") -> str:
     global _translating, _thread, _source_lang, _target_lang
     if _translating:
         return "Already translating."
+    if not HAS_PYAUDIO:
+        return "pyaudio not installed. Run: pip install pyaudio"
     import importlib.util
 
     if importlib.util.find_spec("whisper") is None:

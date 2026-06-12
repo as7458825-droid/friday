@@ -123,7 +123,7 @@ class ChatWindow:
         self._running = True
         self._poll_interval = 200
 
-        from mainbackup import handle_command
+        from main1 import handle_command
 
         self._handle_command = handle_command
 

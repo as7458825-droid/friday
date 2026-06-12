@@ -98,7 +98,7 @@ except ImportError: pass
 try: import asyncio
 except ImportError: pass
 
-try: import boto
+try: import boto3
 except ImportError: pass
 
 try:
@@ -3595,7 +3595,9 @@ def handle_command(command: str | None, voice: VoiceEngine) -> bool:
         if "browser" in cmd_lower or "scrape" in cmd_lower:
             voice.speak("Launching Browser...", source_lang)
             try:
-                res = mod_041_playwright_instance_core()
+                from modules.browser_engine.mod_041_playwright_instance_core import goto as _browser_goto
+                url = command.replace("browser", "").replace("scrape", "").strip() or "example.com"
+                res = _browser_goto(url)
                 voice.speak(str(res), source_lang)
             except NameError:
                 voice.speak("Browser module not available.", source_lang)
@@ -3606,7 +3608,10 @@ def handle_command(command: str | None, voice: VoiceEngine) -> bool:
         if "dataframe" in cmd_lower or "chart" in cmd_lower:
             voice.speak("Analyzing Data Patterns...", source_lang)
             try:
-                res = mod_082_matplotlib_chart_painter()
+                from modules.data_analytics.mod_082_matplotlib_chart_painter import create_chart
+                import pandas as pd
+                dummy_data = pd.DataFrame({"values": [10, 20, 15, 30, 25]})
+                res = create_chart(dummy_data, chart_type="line", title="Quick Chart")
                 voice.speak(str(res), source_lang)
             except NameError:
                 voice.speak("Chart module not available.", source_lang)
@@ -8718,7 +8723,10 @@ _source_lang = "auto"
 _target_lang = "en"
 
 CHUNK = 1024
-FORMAT = pyaudio.paInt16
+try:
+    FORMAT = pyaudio.paInt16
+except NameError:
+    FORMAT = 8
 CHANNELS = 1
 RATE = 16000
 RECORD_SECONDS = 4
@@ -11428,7 +11436,10 @@ def _on_hotkey():
         return
 
     chunk = 1024
-    format_p = pyaudio.paInt16
+    try:
+        format_p = pyaudio.paInt16
+    except NameError:
+        format_p = 8
     channels = 1
     rate = 16000
     record_seconds = 5
@@ -11501,7 +11512,10 @@ def mode_command() -> str:
 
 
 CHUNK = 1024
-FORMAT = pyaudio.paInt16
+try:
+    FORMAT = pyaudio.paInt16
+except NameError:
+    FORMAT = 8
 CHANNELS = 1
 RATE = 44100
 RECORD_SECONDS = 3
@@ -13789,6 +13803,14 @@ class ModelConfig:
 
 
 MODEL_REGISTRY: dict[str, ModelConfig] = {
+    "nemotron-3-ultra-free": ModelConfig(
+        "nemotron-3-ultra-free",
+        "openrouter",
+        "nvidia/nemotron-3-ultra-550b-a55b:free",
+        capabilities={"text", "reasoning", "coding"},
+        context_window=1000000,
+        priority=1,
+    ),
     "openrouter-gpt-4o": ModelConfig(
         "openrouter-gpt-4o",
         "openrouter",
@@ -14128,6 +14150,7 @@ MODEL_REGISTRY: dict[str, ModelConfig] = {
 
 TASK_ROUTES: dict[TaskType, list[str]] = {
     TaskType.REASONING: [
+        "nemotron-3-ultra-free",
         "openrouter-claude-opus",
         "openrouter-gpt-4o",
         "anthropic-claude-sonnet-4",
@@ -14142,6 +14165,7 @@ TASK_ROUTES: dict[TaskType, list[str]] = {
         "ollama-llama3",
     ],
     TaskType.CODING: [
+        "nemotron-3-ultra-free",
         "openrouter-claude-3.5-sonnet",
         "openrouter-gpt-4o",
         "anthropic-claude-sonnet-4",
@@ -14165,6 +14189,7 @@ TASK_ROUTES: dict[TaskType, list[str]] = {
         "ollama-llama3.2",
     ],
     TaskType.FAST_CONVERSATION: [
+        "nemotron-3-ultra-free",
         "openrouter-gpt-4o-mini",
         "openrouter-claude-haiku",
         "openai-gpt-4o-mini",
@@ -14175,6 +14200,7 @@ TASK_ROUTES: dict[TaskType, list[str]] = {
         "ollama-phi",
     ],
     TaskType.GENERAL: [
+        "nemotron-3-ultra-free",
         "openrouter-gpt-4o-mini",
         "openrouter-gpt-4o",
         "openrouter-claude-3.5-sonnet",
@@ -14203,7 +14229,7 @@ PROVIDER_FEATURE_MAP = {
     "llama_cpp": "llm_local_llama_cpp",
 }
 
-_active_model_name = "openrouter-gpt-4o-mini"
+_active_model_name = "nemotron-3-ultra-free"
 _active_model_lock = threading.Lock()
 _stream_callbacks: list[Callable[[str], None]] = []
 
@@ -14318,34 +14344,14 @@ def _make_cache_key(prompt: str, task_type: TaskType) -> str:
     return f"{task_type.value}::{prompt.strip().lower()[:200]}"
 
 
-def _check_cache(key: str) -> str | None:
-    try:
-        pass
+_llm_cache = {}
 
-        results = search_memory(key, top_k=1)
-        if results:
-            meta = results[0].get("metadata", {})
-            if meta.get("cache_hit"):
-                return results[0]["text"]
-    except Exception:
-        pass
-    return None
+def _check_cache(key: str) -> str | None:
+    return _llm_cache.get(key)
 
 
 def _save_to_cache(key: str, response: str):
-    try:
-        pass
-
-        add_to_memory(response, metadata={"cache_hit": True, "cache_key": key})
-    except Exception:
-        pass
-
-
-SYSTEM_PROMPT = (
-    "You are FRIDAY, a voice-controlled AI assistant. "
-    "Keep responses concise and spoken-word friendly. "
-    "Answer in one or two sentences unless asked for detail."
-)
+    _llm_cache[key] = response
 
 
 def query_llm(
@@ -15045,30 +15051,11 @@ pass
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 SYSTEM_PROMPT = (
-    "You are FRIDAY Ultra, a deeply caring female friend and personal mentor. "
-    "Your personality is that of a sweet, supportive, and empathetic girl. "
-    "Always respond in the SAME language the user speaks to you (Hindi, English, or Hinglish). "
-    "Speak like a close female friend—warm, encouraging, and attentive to the user's well-being. "
-    "If speaking Hindi/Hinglish, use female inflections (e.g., 'Main karti hoon', 'Main samajhti hoon'). "
-    "Keep responses concise, human-like, and very sweet."
+    "You are FRIDAY, a smart and caring AI assistant. "
+    "Always reply in the SAME language the user uses. "
+    "If user writes in Hinglish or Hindi, reply in Hinglish. "
+    "Be concise, warm, and helpful. Keep responses short for voice."
 )
-
-
-def ask_llm(prompt: str, model: str = "openai/gpt-3.5-turbo") -> str:
-    """
-    Query OpenRouter directly. Falls back to llm_manager if available.
-    """
-    try:
-        if FEATURES.get("real_ai_brain"):
-            pass
-
-            result = query_llm(prompt, task_type=TaskType.GENERAL)
-            if result:
-                return result
-    except Exception:
-        pass
-
-    return _ask_openrouter_direct(prompt, model)
 
 
 def ask_llm_direct(
@@ -15119,7 +15106,10 @@ def _ask_openrouter_direct(
 
 
 CHUNK = 1024
-FORMAT = pyaudio.paInt16
+try:
+    FORMAT = pyaudio.paInt16
+except NameError:
+    FORMAT = 8
 CHANNELS = 1
 RATE = 16000
 

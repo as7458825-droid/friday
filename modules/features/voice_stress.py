@@ -3,10 +3,18 @@ import tempfile
 import wave
 
 import numpy as np
-import pyaudio
+try:
+    import pyaudio
+    HAS_PYAUDIO = True
+except ImportError:
+    pyaudio = None
+    HAS_PYAUDIO = False
 
 CHUNK = 1024
-FORMAT = pyaudio.paInt16
+try:
+    FORMAT = pyaudio.paInt16
+except NameError:
+    FORMAT = 8
 CHANNELS = 1
 RATE = 44100
 RECORD_SECONDS = 3
@@ -15,6 +23,8 @@ _analyzer = None
 
 
 def analyze_stress() -> str:
+    if not HAS_PYAUDIO:
+        return "pyaudio not installed. Run: pip install pyaudio"
     try:
         import librosa
     except ImportError:

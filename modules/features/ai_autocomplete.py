@@ -1,7 +1,12 @@
 import threading
 import time
 
-import keyboard
+try:
+    import keyboard
+    HAS_KEYBOARD = True
+except ImportError:
+    keyboard = None
+    HAS_KEYBOARD = False
 import pyperclip
 
 _active = False
@@ -22,6 +27,8 @@ def start_autocomplete() -> str:
         return "Already running."
     if not HAS_LLM:
         return "LLM not available. Enable real_ai_brain."
+    if not HAS_KEYBOARD:
+        return "keyboard library not installed. Run: pip install keyboard"
     _active = True
     _thread = threading.Thread(target=_autocomplete_loop, daemon=True)
     _thread.start()

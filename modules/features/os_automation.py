@@ -1,4 +1,9 @@
-import pyautogui
+try:
+    import pyautogui
+    HAS_PYAUTOGUI = True
+except ImportError:
+    pyautogui = None
+    HAS_PYAUTOGUI = False
 import os
 import logging
 
@@ -25,6 +30,8 @@ class OSAutomation:
 
     def take_screenshot(self, filename="screenshot.png"):
         """Captures the entire screen"""
+        if not HAS_PYAUTOGUI:
+            return "pyautogui not installed. Run: pip install pyautogui"
         try:
             pyautogui.screenshot(filename)
             return f"Screenshot saved as {filename}."

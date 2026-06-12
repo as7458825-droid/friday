@@ -1,4 +1,9 @@
-import librosa
+try:
+    import librosa
+    HAS_LIBROSA = True
+except ImportError:
+    librosa = None
+    HAS_LIBROSA = False
 import numpy as np
 import logging
 
@@ -10,6 +15,8 @@ class AudioLab:
 
     def analyze_stress(self, audio_path):
         """Analyze pitch variations to detect stress"""
+        if not HAS_LIBROSA:
+            return "librosa not installed. Run: pip install librosa"
         try:
             y, sr = librosa.load(audio_path)
             pitches, magnitudes = librosa.piptrack(y=y, sr=sr)

@@ -1,6 +1,11 @@
 import os
 import shutil
-import pyautogui
+try:
+    import pyautogui
+    HAS_PYAUTOGUI = True
+except ImportError:
+    pyautogui = None
+    HAS_PYAUTOGUI = False
 
 
 def organize_desktop():
@@ -31,6 +36,8 @@ def organize_desktop():
 
 def control_software(app_name, action):
     """Deep control for common software."""
+    if not HAS_PYAUTOGUI:
+        return "pyautogui not installed. Run: pip install pyautogui"
     if "chrome" in app_name.lower():
         if "close tabs" in action.lower():
             pyautogui.hotkey("ctrl", "shift", "w")
