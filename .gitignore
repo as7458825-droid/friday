@@ -1,0 +1,55 @@
+# Secrets and Credentials
+.env
+google_credentials.json
+# Ignore most JSON but allow package and config examples
+*.json
+!package.json
+!*.example.json
+!config.json
+!dashboard/package.json
+!dashboard/package-lock.json
+
+# Environments
+venv/
+venv_312/
+ENV/
+.env/
+Lib/
+Scripts/
+
+# Python Cache and Compiled Files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.vscode/
+
+# Build and Distribution
+build/
+dist/
+*.spec
+
+# Logs and Data
+logs/
+*.log
+memory_db/
+data/memory_db/
+data/output/
+output/
+data/chroma_data/
+
+# Backup and Temporary Files
+*.bak
+*.path_bak
+*.import_bak
+_*.py
+ARCHIVE_main_original.py
+dekho_code.py
+
+# Project Specific
+*.csv
+*.sqlite3
+node_modules/
+dashboard/dist/
+dashboard/node_modules/

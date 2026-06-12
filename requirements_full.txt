@@ -1,0 +1,80 @@
+# =============================================================================
+# FRIDAY AI — Complete Dependencies
+# Install:  pip install -r requirements_full.txt
+#           playwright install chromium
+# =============================================================================
+
+# --- Core Voice (Domain 0) ---
+speechrecognition
+pyttsx3
+pyautogui
+psutil
+pyaudio
+
+# --- LLM / OpenRouter (Domain 0 — real_ai_brain) ---
+requests
+
+# --- Memory (Domain 2 — learning_memory) ---
+chromadb
+sentence-transformers
+
+# --- Browser Engine (Domain 4 — browser_engine) ---
+playwright
+
+# --- Vision (Domain 5 — nim_vision) ---
+opencv-python
+pillow
+transformers
+torch
+torchvision
+pytesseract
+
+# --- Media Studio (Domain 6 — media_studio) ---
+openai-whisper
+pydub
+ffmpeg-python
+librosa
+soundfile
+pyaudio
+
+# --- HUD GUI (Domain 7 — hud_gui) ---
+customtkinter
+matplotlib
+plyer
+
+# --- Self-Evolution (Domain 10 — self_evolution) ---
+gitpython
+
+# --- Security Vault (Domain 11 — security_vault) ---
+cryptography
+watchdog
+keyring
+sshtunnel
+
+# --- DevOps & Code Compiler (Domain 8 — devops_compiler) ---
+gitpython
+docker
+pytest
+black
+flake8
+jinja2
+markdown
+weasyprint
+pdfkit
+
+# --- Data Analytics & Reporting (Domain 9 — data_analytics) ---
+pandas
+openpyxl
+seaborn
+pdfplumber
+jsonschema
+python-pptx
+xlrd
+
+# --- Optional extras ---
+# spleeter          # heavy — vocal separation
+# demucs            # heavy — source separation
+# tabula-py         # requires Java — PDF table extraction alternative
+# elevenlabs        # TTS alternative
+# openai            # alternative LLM provider
+# nvidia-nim        # vision inference
